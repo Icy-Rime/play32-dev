@@ -14,7 +14,7 @@ def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     import uerrno, uhashlib, uheapq, uio, ujson
     import uos, ure, uselect, usocket, ussl
     import ustruct, usys, utime, uzlib
-    import btree, framebuf, machine, micropython
+    import btree, framebuf, machine, micropython, network
     # stander
     sys.modules["cmath"] = ucmath # no alias
     sys.modules["gc"] = ugc # no alias
@@ -40,6 +40,7 @@ def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     sys.modules["framebuf"] = framebuf # no alias
     sys.modules["machine"] = machine # no alias
     sys.modules["micropython"] = micropython # no alias
+    sys.modules["network"] = network # no alias
     # u-prefix
     sys.modules["uarray"] = uarray
     sys.modules["uasyncio"] = uasyncio # no alias
@@ -85,6 +86,6 @@ if __name__ == "__main__":
     # import time
     # t.init(mode=PERIODIC, period=500, callback=cb)
     # time.sleep(5)
-    import hal_buzz
-    hal_buzz.init()
-    print(hal_buzz.get_buzz_player())
+    import network
+    n = network.WLAN(network.STA_IF)
+    print(n)
