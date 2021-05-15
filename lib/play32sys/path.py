@@ -8,6 +8,12 @@ __APP_BASE = '/apps'
 __DATA_BASE = '/data'
 __cur_app = ''
 
+def _update_base_path(root, app, data):
+    global __ROOT_BASE, __APP_BASE, __DATA_BASE
+    __ROOT_BASE = root
+    __APP_BASE = app
+    __DATA_BASE = data
+
 def _get_curr_app():
     return __cur_app
 

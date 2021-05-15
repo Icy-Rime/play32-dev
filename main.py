@@ -1,10 +1,11 @@
 # >>>> main <<<<
 import os, sys
 PLAY32DEV_PATH = os.path.dirname(os.path.abspath(__file__))
-def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
+def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     # replace builtin modules
     global os, sys
     lib_path = os.path.join(sdk_path, "lib")
+    data_path = os.path.join(sdk_path, "data")
     if current_app_path == None:
         current_app_path = os.path.dirname(os.path.abspath(__file__))
     app_path = os.path.abspath(os.path.join(current_app_path, ".."))
@@ -13,7 +14,7 @@ def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
     import uerrno, uhashlib, uheapq, uio, ujson
     import uos, ure, uselect, usocket, ussl
     import ustruct, usys, utime, uzlib
-    import btree, framebuf
+    import btree, framebuf, machine, micropython
     # stander
     sys.modules["cmath"] = ucmath # no alias
     sys.modules["gc"] = ugc # no alias
@@ -37,6 +38,8 @@ def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
     # sys.modules["zlib"] = uzlib
     sys.modules["btree"] = btree # no alias
     sys.modules["framebuf"] = framebuf # no alias
+    sys.modules["machine"] = machine # no alias
+    sys.modules["micropython"] = micropython # no alias
     # u-prefix
     sys.modules["uarray"] = uarray
     sys.modules["uasyncio"] = uasyncio # no alias
@@ -60,6 +63,8 @@ def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
     sys.path.insert(0, os.path.join(current_app_path, "lib"))
     sys.path.insert(0, current_app_path)
     # setup
+    from play32sys import path
+    path._update_base_path(sdk_path, app_path, data_path)
     # import hal_screen, hal_keypad, hal_buzz
     # hal_screen.init(0)
     # hal_keypad.init()
@@ -73,10 +78,13 @@ if __name__ == "__main__":
     setup()
     # >>>> init <<<<
     # >>>> test <<<<
-    import io, btree
-    stm = io.BytesIO()
-    bt = btree.open(stm)
-    bt[b"key"] = b"val"
-    for k, v in bt.items():
-        print(k, v)
-    # print(bt)
+    # from play32hw.shared_timer import get_shared_timer, PERIODIC
+    # t = get_shared_timer(0)
+    # def cb(tm):
+    #     print("123", tm)
+    # import time
+    # t.init(mode=PERIODIC, period=500, callback=cb)
+    # time.sleep(5)
+    import hal_buzz
+    hal_buzz.init()
+    print(hal_buzz.get_buzz_player())
