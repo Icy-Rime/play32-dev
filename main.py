@@ -13,6 +13,7 @@ def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
     import uerrno, uhashlib, uheapq, uio, ujson
     import uos, ure, uselect, usocket, ussl
     import ustruct, usys, utime, uzlib
+    import btree, framebuf
     # stander
     sys.modules["cmath"] = ucmath # no alias
     sys.modules["gc"] = ugc # no alias
@@ -34,6 +35,8 @@ def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
     # sys.modules["sys"] = usys
     # sys.modules["time"] = utime
     # sys.modules["zlib"] = uzlib
+    sys.modules["btree"] = btree # no alias
+    sys.modules["framebuf"] = framebuf # no alias
     # u-prefix
     sys.modules["uarray"] = uarray
     sys.modules["uasyncio"] = uasyncio # no alias
@@ -62,14 +65,18 @@ def setup(sdk_path = PLAY32DEV_PATH, current_app_path=None):
     # hal_keypad.init()
     # hal_buzz.init()
     # test
-    import utime
-    st = utime.localtime(0)
-    print(st)
-    print(utime.mktime(st))
     # from play32sys import path
     # print(path.exist("/"))
     # print(path.exist("D:\\CODE\\Python\\play32_dev\\main.py"))
 
 if __name__ == "__main__":
     setup()
-# >>>> init <<<<
+    # >>>> init <<<<
+    # >>>> test <<<<
+    import io, btree
+    stm = io.BytesIO()
+    bt = btree.open(stm)
+    bt[b"key"] = b"val"
+    for k, v in bt.items():
+        print(k, v)
+    # print(bt)
