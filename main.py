@@ -10,8 +10,10 @@ if __name__ == "__main__":
     # app.run_app(app_name)
     # >>>> test <<<<
     print("start")
-    import hal_screen, utime
-    frame = hal_screen.get_framebuffer()
-    frame.fill(1)
-    hal_screen.refresh()
-    utime.sleep_ms(5000)
+    import ucryptolib
+    a = ucryptolib.aes(b"This_key_for_demo_purposes_only!", 2, b"InitializationVe")
+    plaintext = b"TextMustBe16Byte"
+    encrypted = a.encrypt(plaintext)
+    a = ucryptolib.aes(b"This_key_for_demo_purposes_only!", 2, b"InitializationVe")
+    plaintext = a.decrypt(encrypted)
+    print(plaintext)
