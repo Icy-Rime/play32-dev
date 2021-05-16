@@ -20,7 +20,7 @@ def setup(current_app_dir_path):
     import uos, ure, uselect, usocket, ussl
     import ustruct, usys, utime, uzlib
     import btree, framebuf, machine, micropython, network
-    import ubluetooth, ucryptolib
+    import ubluetooth, ucryptolib, uctypes
     # no-prefix
     sys.modules["cmath"] = ucmath # no alias
     sys.modules["gc"] = ugc # no alias
@@ -68,6 +68,7 @@ def setup(current_app_dir_path):
     sys.modules["uzlib"] = uzlib
     sys.modules["ubluetooth"] = ubluetooth # no alias
     sys.modules["ucryptolib"] = ucryptolib # no alias
+    sys.modules["uctypes"] = uctypes # no alias
     # setup
     from play32sys import path
     path._update_base_path(sdk_path, apps_base_dir_path, data_path)
