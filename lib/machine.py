@@ -1,12 +1,15 @@
 from os import X_OK
+from sys import exit
 import time as cpy_time
 import threading, traceback
 # Reset related functions
 # not work on CPython
 def reset():
     print("reset, but won`t affact anything on CPython")
+    exit()
 def soft_reset():
     print("soft reset, but won`t affact anything on CPython")
+    exit()
 def reset_cause():
     return 0
 

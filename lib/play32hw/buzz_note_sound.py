@@ -70,7 +70,7 @@ class BuzzPlayer():
         self.__is_playing = False
         # CPython
         self.__output = pyg_midi.Output(0)
-        self.__output.set_instrument(2)
+        self.__output.set_instrument(21)
         # self.__output = mido.open_output()
         # self.__output.send(mido.Message('program_change', program=2))
         self.__playing = None
