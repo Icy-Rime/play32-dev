@@ -1,6 +1,9 @@
 
-from machine import Pin
-from play32hw.hw_config import PIN_KEY_A, PIN_KEY_B, PIN_KEY_UP, PIN_KEY_DOWN, PIN_KEY_LEFT, PIN_KEY_RIGHT
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+from pygame import locals as L
+from pygame import event as pyg_event
+import hal_screen
 
 KEY_A = 0x00
 KEY_B = 0x01
@@ -13,47 +16,58 @@ EVENT_KEY_PRESS = 0x00
 EVENT_KEY_RELEASE = 0x10
 
 __keypad = None
+__pc_key_map = {
+    L.K_k: KEY_A,
+    L.K_j: KEY_B,
+    L.K_w: KEY_UP,
+    L.K_s: KEY_DOWN,
+    L.K_a: KEY_LEFT,
+    L.K_d: KEY_RIGHT,
+}
+__pc_key_status = [False, False, False, False, False, False]
 __key_status = [False, False, False, False, False, False]
 __key_name = "ABUDLR"
+
+def __update_pc_key_status():
+    emu = hal_screen._get_ssd1306_emu()
+    if emu == None:
+        return # screen not inited
+    for event in emu._get_pygame_event():
+        if event.type == L.KEYDOWN or event.type == L.KEYUP:
+            pc_key = event.key
+            status = True if event.type == L.KEYDOWN else False
+            if pc_key in __pc_key_map:
+                __pc_key_status[__pc_key_map[pc_key]] = status
 
 def init():
     # type: () -> None
     global __keypad
     if __keypad != None:
         return
-    t_a = Pin(PIN_KEY_A, Pin.IN, Pin.PULL_UP)
-    t_b = Pin(PIN_KEY_B, Pin.IN, Pin.PULL_UP)
-    t_up = Pin(PIN_KEY_UP, Pin.IN, Pin.PULL_UP)
-    t_dn = Pin(PIN_KEY_DOWN, Pin.IN, Pin.PULL_UP)
-    t_lt = Pin(PIN_KEY_LEFT, Pin.IN, Pin.PULL_UP)
-    t_rt = Pin(PIN_KEY_RIGHT, Pin.IN, Pin.PULL_UP)
-    __keypad = (t_a, t_b, t_up, t_dn, t_lt, t_rt)
+    __keypad = (KEY_A, KEY_B, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT)
 
 def get_key_value(key):
     # type: (int) -> int
-    return __keypad[key].value()
+    return 0 if __pc_key_status[key] else 1
 
 def get_key_name(key):
     return __key_name[key]
 
 def get_key_event():
     # type: () -> list
+    __update_pc_key_status()
     events = []
     for i in range(len(__keypad)):
         v = get_key_value(i)
         if __key_status[i] and v > 0:
             # release
             __key_status[i] = False
-            # text = str(i) + " RELEASED"
-            # print(text)
             events.append(EVENT_KEY_RELEASE | i)
         elif __key_status[i] == False and v == 0:
             # press
             __key_status[i] = True
-            # text = str(i) + " PRESSED"
-            # print(text)
             events.append(EVENT_KEY_PRESS | i)
-        # keep
+    #     # keep
     return events
 
 def parse_key_event(event):

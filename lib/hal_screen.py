@@ -3,11 +3,14 @@ from play32hw.hw_config import SCREEN_WIDTH, SCREEN_HEIGHT
 
 __screen = None
 
+def _get_ssd1306_emu():
+    return __screen
+
 def init(brightness=255):
     global __screen
     if __screen != None:
         return
-    __screen = SSD1306_Emu(SCREEN_WIDTH, SCREEN_HEIGHT)
+    __screen = SSD1306_Emu(SCREEN_WIDTH, SCREEN_HEIGHT, ignore_pygame_event=True)
     __screen.contrast(brightness)
 
 def get_size():

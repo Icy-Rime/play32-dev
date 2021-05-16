@@ -1,3 +1,5 @@
+import builtins
+from typing import List, Any
 def const(val):
     return val
 
@@ -36,3 +38,28 @@ def kbd_intr(chr):
 
 def schedule(func, arg):
     func(arg)
+
+def native(fn):
+    return fn
+
+def viper(fn):
+    return fn
+
+class ptr():
+    def __new__(cls, obj) -> Any:
+        return obj
+class ptr8():
+    def __new__(cls, obj) -> Any:
+        return bytearray(obj)
+class ptr16():
+    def __new__(cls, obj) -> Any:
+        return list(obj)
+class ptr32():
+    def __new__(cls, obj) -> Any:
+        return list(obj)
+
+builtins.__dict__["uint"] = int
+builtins.__dict__["ptr"] = ptr
+builtins.__dict__["ptr8"] = ptr8
+builtins.__dict__["ptr16"] = ptr16
+builtins.__dict__["ptr32"] = ptr32

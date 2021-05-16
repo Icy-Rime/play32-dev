@@ -1,3 +1,5 @@
+import os
+__current_dir = os.path.dirname(os.path.abspath(__file__))
 __font_8 = None
 __font_16 = None
 
@@ -12,6 +14,6 @@ def get_font_16px():
     global __font_16
     if __font_16 == None:
         from graphic import ubmfont
-        f = open('/resource/font/pix16x16.ufnt', "rb")
+        f = open(os.path.join(__current_dir, 'pix16x16.ufnt'), "rb")
         __font_16 = ubmfont.FontDrawUnicode(f)
     return __font_16
