@@ -15,6 +15,7 @@ def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     import uos, ure, uselect, usocket, ussl
     import ustruct, usys, utime, uzlib
     import btree, framebuf, machine, micropython, network
+    import ubluetooth
     # stander
     sys.modules["cmath"] = ucmath # no alias
     sys.modules["gc"] = ugc # no alias
@@ -41,6 +42,7 @@ def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     sys.modules["machine"] = machine # no alias
     sys.modules["micropython"] = micropython # no alias
     sys.modules["network"] = network # no alias
+    sys.modules["ubluetooth"] = ubluetooth # no alias
     # u-prefix
     sys.modules["uarray"] = uarray
     sys.modules["uasyncio"] = uasyncio # no alias
