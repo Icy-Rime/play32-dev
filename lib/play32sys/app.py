@@ -41,7 +41,7 @@ def reset_and_run_app(app_name, *args, **kws):
     reset()
 
 def run_app(app_name, *args, **kws):
-    sys.path[:] = ['', 'lib', '/', '/lib']
+    # sys.path[:] = ['', 'lib', '/', '/lib']
     curr = os.getcwd()
     c_a = _get_curr_app()
     _set_curr_app(app_name)

@@ -71,9 +71,9 @@ class Pin():
     PULL_UP = 2
     PULL_HOLD = 4
     OPEN_DRAIN = 7
-    def __init__(id, mode=- 1, pull=- 1):
+    def __init__(self, id, mode=- 1, pull=- 1):
         pass
-    def init(mode=- 1, pull=- 1):
+    def init(self, mode=- 1, pull=- 1):
         pass
     def value(self, x=None):
         if x == None:

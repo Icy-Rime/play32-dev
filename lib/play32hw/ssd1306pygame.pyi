@@ -1,7 +1,4 @@
-try:
-    import framebuf
-except ImportError:
-    from . import framebuf
+import framebuf
 
 class SSD1306_Emu(framebuf.FrameBuffer):
     width: int

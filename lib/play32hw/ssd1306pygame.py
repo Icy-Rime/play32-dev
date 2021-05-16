@@ -1,11 +1,10 @@
-try:
-    import framebuf
-except ImportError:
-    from . import framebuf
+import framebuf
 
 from sys import exit
 from multiprocessing import Process, Queue, Array
 # from pygame.time import wait
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from pygame import locals as L
 from pygame import display as pyg_display
 from pygame import event as pyg_event
@@ -196,7 +195,7 @@ class SSD1306_Emu(framebuf.FrameBuffer):
             self.__loop = Process(
                 target=_pygame_loop,
                 args=(self.__loop_queue, self.width, self.height, self.__scale, self.__screen_buffer),
-                daemon=False
+                daemon=True
             )
             self.__loop.start()
 

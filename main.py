@@ -1,5 +1,6 @@
 # >>>> main <<<<
 import os, sys
+
 PLAY32DEV_PATH = os.path.dirname(os.path.abspath(__file__))
 def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     # replace builtin modules
@@ -8,6 +9,7 @@ def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     data_path = os.path.join(sdk_path, "data")
     if current_app_path == None:
         current_app_path = os.path.dirname(os.path.abspath(__file__))
+    app_name = os.path.basename(current_app_path)
     app_path = os.path.abspath(os.path.join(current_app_path, ".."))
     sys.path.append(lib_path)
     import ucmath, umath, ugc, uarray, uasyncio, ubinascii, ucollections
@@ -68,17 +70,14 @@ def setup(sdk_path=PLAY32DEV_PATH, current_app_path=None):
     # setup
     from play32sys import path
     path._update_base_path(sdk_path, app_path, data_path)
-    # import hal_screen, hal_keypad, hal_buzz
-    # hal_screen.init(0)
-    # hal_keypad.init()
-    # hal_buzz.init()
-    # test
-    # from play32sys import path
-    # print(path.exist("/"))
-    # print(path.exist("D:\\CODE\\Python\\play32_dev\\main.py"))
+    import hal_screen, hal_keypad, hal_buzz
+    hal_screen.init(0)
+    hal_keypad.init()
+    hal_buzz.init()
+    return app_name
 
 if __name__ == "__main__":
-    setup()
+    app_name = setup()
     # >>>> init <<<<
     # >>>> test <<<<
     # from play32hw.shared_timer import get_shared_timer, PERIODIC
@@ -88,6 +87,9 @@ if __name__ == "__main__":
     # import time
     # t.init(mode=PERIODIC, period=500, callback=cb)
     # time.sleep(5)
-    import network
-    n = network.WLAN(network.STA_IF)
-    print(n)
+    print("start")
+    import hal_screen, utime
+    frame = hal_screen.get_framebuffer()
+    frame.fill(1)
+    hal_screen.refresh()
+    utime.sleep_ms(5000)
