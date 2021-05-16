@@ -70,7 +70,7 @@ class BuzzPlayer():
         self.__is_playing = False
         # CPython
         self.__output = pyg_midi.Output(0)
-        self.__output.set_instrument(21)
+        self.__output.set_instrument(26)
         # self.__output = mido.open_output()
         # self.__output.send(mido.Message('program_change', program=2))
         self.__playing = None
@@ -94,6 +94,9 @@ class BuzzPlayer():
     def note_on(self, note, volume):
         if self.__playing:
             self.__output.note_off(self.__playing, 0)
+        note = note + self.__note_shift + 7
+        note = 0 if note < 0 else note
+        note = 128 - 1 if note >= 128 else note
         self.__output.note_on(note, volume*127//9)
         self.__playing = note
         # if self.__playing:
