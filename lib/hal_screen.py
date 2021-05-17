@@ -1,20 +1,25 @@
+import framebuf
 from play32hw.ssd1306pygame import SSD1306_Emu
 from play32hw.hw_config import SCREEN_WIDTH, SCREEN_HEIGHT
 
 __screen = None
+__format = -1
 
 def _get_ssd1306_emu():
     return __screen
 
-def init(brightness=255):
-    global __screen
+def init():
+    global __screen, __format
     if __screen != None:
         return
     __screen = SSD1306_Emu(SCREEN_WIDTH, SCREEN_HEIGHT, ignore_pygame_event=True)
-    __screen.contrast(brightness)
+    __format = framebuf.MONO_VLSB
 
 def get_size():
     return SCREEN_WIDTH, SCREEN_HEIGHT
+
+def get_format():
+    return __format
 
 def get_framebuffer():
     return __screen

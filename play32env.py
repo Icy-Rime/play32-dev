@@ -73,7 +73,7 @@ def setup(current_app_dir_path):
     from play32sys import path
     path._update_base_path(sdk_path, apps_base_dir_path, data_path)
     import hal_screen, hal_keypad, hal_buzz
-    hal_screen.init(0)
+    hal_screen.init()
     hal_keypad.init()
     hal_buzz.init()
     return app_name

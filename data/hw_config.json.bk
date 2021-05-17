@@ -8,7 +8,13 @@
     "pin_key_right": 14,
     "pin_key_a": 34,
     "pin_key_b": 35,
+    "screen_driver": "ssd1351",
     "screen_width": 128,
-    "screen_height": 64,
+    "screen_height": 128,
+    "pin_screen_scl": 32,
+    "pin_screen_sda_mosi": 33,
+    "pin_screen_cs": 14,
+    "pin_screen_dc": 12,
+    "pin_screen_rst": 27,
     "version": 1
 }
