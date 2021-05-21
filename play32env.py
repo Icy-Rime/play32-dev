@@ -8,6 +8,7 @@ def setup(current_app_dir_path):
     sdk_path=PLAY32DEV_PATH
     lib_path = os.path.join(sdk_path, "lib")
     data_path = os.path.join(sdk_path, "data")
+    component_path = os.path.join(sdk_path, "components")
     app_lib_path = os.path.join(current_app_dir_path, "lib")
     app_name = os.path.basename(current_app_dir_path)
     apps_base_dir_path = os.path.abspath(os.path.join(current_app_dir_path, ".."))
@@ -71,7 +72,7 @@ def setup(current_app_dir_path):
     sys.modules["uctypes"] = uctypes # no alias
     # setup
     from play32sys import path
-    path._update_base_path(sdk_path, apps_base_dir_path, data_path)
+    path._update_base_path(sdk_path, apps_base_dir_path, data_path, component_path)
     import hal_screen, hal_keypad, hal_buzz
     hal_screen.init()
     hal_keypad.init()

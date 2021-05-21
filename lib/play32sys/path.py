@@ -6,13 +6,15 @@ FILE_TYPE_FILE = 0X8000
 __ROOT_BASE = '/'
 __APP_BASE = '/apps'
 __DATA_BASE = '/data'
+__COMPONENT_BASE = '/components'
 __cur_app = ''
 
-def _update_base_path(root, app, data):
-    global __ROOT_BASE, __APP_BASE, __DATA_BASE
+def _update_base_path(root, app, data, component):
+    global __ROOT_BASE, __APP_BASE, __DATA_BASE, __COMPONENT_BASE
     __ROOT_BASE = root
     __APP_BASE = app
     __DATA_BASE = data
+    __COMPONENT_BASE = component
 
 def _get_curr_app():
     return __cur_app
@@ -49,14 +51,20 @@ def exist(pt):
 
 def get_app_path(name='/'):
     # type: (str) -> str
-    if __cur_app == '/':
-        return __ROOT_BASE
+    if name == '/':
+        return __APP_BASE
     else:
         return join(__APP_BASE, name)
 
 def get_data_path(name='/'):
     # type: (str) -> str
-    if __cur_app == '/':
+    if name == '/':
         return __DATA_BASE
     else:
         return join(__DATA_BASE, name)
+
+def get_component_path(name='/'):
+    if name == '/':
+        return __COMPONENT_BASE
+    else:
+        return join(__COMPONENT_BASE, name)
