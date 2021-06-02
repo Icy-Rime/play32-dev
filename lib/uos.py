@@ -45,6 +45,9 @@ def mount(fsobj, mount_point, *, readonly):
 def umount(_):
     pass
 class Vfs():
+    def __init(self, block_dev, readsize=32, progsize=32, lookahead=32, mtime=True):
+        pass
+    @staticmethod
     def mkfs(block_dev, readsize=32, progsize=32, lookahead=32):
         pass
 VfsFat = Vfs()

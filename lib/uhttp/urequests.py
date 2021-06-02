@@ -2,8 +2,8 @@ import requests
 
 Response = requests.Response
 
-def request(method, url, data=None, json=None, headers={}, stream=None):
-    return requests.request(method, url, data=data, json=json, headers=headers, stream=stream)
+def request(method, url, params=None, cookies=None, data=None, json=None, headers={}, parse_headers=True, followRedirect=True):
+    return requests.request(method, url, params=params, cookies=cookies, data=data, json=json, headers=headers, allow_redirects=followRedirect)
 
 
 def head(url, **kw):

@@ -6,6 +6,9 @@ POLLERR = 8
 POLLHUP = 16
 select = cpy_select.select
 
+def poll():
+    return Poll()
+
 class Poll():
     def register(self, obj, eventmask=0):
         pass
