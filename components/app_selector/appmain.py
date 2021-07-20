@@ -1,16 +1,20 @@
 from graphic import pbm, framebuf_helper
-from play32sys import path, app
+from play32sys import path, app, battery
+from play32hw import cpu
 import framebuf, ujson, uos
 import hal_screen as screen
 import hal_keypad as keypad
 from resource.font import get_font_8px
+from utime import ticks_ms, ticks_diff, ticks_add
 FONT_8 = get_font_8px()
 MANIFEST_FILE = "manifest.json"
 MANIFEST_KEY_NAME = "name"
 MANIFEST_KEY_ICON = "icon"
-ICON_SIZE = (48, 48)
 SCREEN_FORMAT = screen.get_format()
 COLOR_WHITE = framebuf_helper.get_white_color(SCREEN_FORMAT)
+ICON_SIZE_W, ICON_SIZE_H = (48, 48)
+SCR_W, SCR_H = screen.get_size()
+FNT_W, FNT_H = FONT_8.get_font_size()
 
 THIS_APP_NAME = "app_selector"
 DEFAULT_ICON = None
@@ -31,7 +35,7 @@ def init():
     global DEFAULT_ICON, app_list, app_pointer
     with open(path.join(path.get_component_path(THIS_APP_NAME), "images", "fallback_icon.pbm"), "rb") as f:
         w, h, _, data, = pbm.read_image(f)[:4]
-    assert (w, h) == ICON_SIZE
+    assert (w, h) == (ICON_SIZE_W, ICON_SIZE_H)
     DEFAULT_ICON = framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
     DEFAULT_ICON = framebuf_helper.ensure_same_format(DEFAULT_ICON, framebuf.MONO_HLSB, w, h, SCREEN_FORMAT, COLOR_WHITE)
     app_list = []
@@ -57,7 +61,7 @@ def get_app_info(app_name):
         icon_path = path.join(app_path, manifest[MANIFEST_KEY_ICON])
         with open(icon_path, "rb") as f:
             w, h, _, data, = pbm.read_image(f)[:4]
-        assert (w, h) == ICON_SIZE
+        assert (w, h) == (ICON_SIZE_W, ICON_SIZE_H)
         icon = framebuf.FrameBuffer(data, w, h, framebuf.MONO_HLSB)
         icon = framebuf_helper.ensure_same_format(icon, framebuf.MONO_HLSB, w, h, SCREEN_FORMAT, COLOR_WHITE)
         return display_name, icon
@@ -69,23 +73,32 @@ def render_point_app():
     frame.fill(0)
     if app_pointer < 0:
         FONT_8.draw_on_frame("No Apps.", frame, 0, 0, COLOR_WHITE)
-        FONT_8.draw_on_frame("Press B to enter FTP mode.", frame, 0, 8, COLOR_WHITE, screen.get_size()[0], screen.get_size()[1]-8)
+        FONT_8.draw_on_frame("Press B to enter FTP mode.", frame, 0, 8, COLOR_WHITE, SCR_W, SCR_H-8)
         screen.refresh()
         return
     app_name = app_list[app_pointer]
     display_name, display_icon = get_app_info(app_name)
     # draw arrows
-    offset_x_arrows_right = screen.get_size()[0] - FONT_8.get_font_size()[0]
+    offset_x_arrows_right = SCR_W - FNT_W
     FONT_8.draw_on_frame("<", frame, 0, 24, COLOR_WHITE)
     FONT_8.draw_on_frame(">", frame, offset_x_arrows_right, 24, COLOR_WHITE)
     # draw app_name
-    width_display_name = FONT_8.get_font_size()[0] * len(display_name)
-    offset_x_display_name = (screen.get_size()[0] - width_display_name) // 2
+    width_display_name = FNT_W * len(display_name)
+    offset_x_display_name = (SCR_W - width_display_name) // 2
     FONT_8.draw_on_frame(display_name, frame, offset_x_display_name, 56, COLOR_WHITE)
     # draw icon
-    offset_x_icon = (screen.get_size()[0] - ICON_SIZE[0]) // 2
+    offset_x_icon = (SCR_W - ICON_SIZE_W) // 2
     frame.blit(display_icon, offset_x_icon, 0)
-    screen.refresh()
+
+def render_battery_level():
+    frame = screen.get_framebuffer()
+    battery_level = str(battery.get_battery_level())
+    width_battery_level = FNT_W * len(battery_level)
+    offset_x_battery_level = SCR_W - width_battery_level
+    width_clear = FNT_W * 3 # 100 battery
+    offset_x_clear = SCR_W - width_clear
+    frame.fill_rect(offset_x_clear, 0, width_clear, FNT_H, 0)
+    FONT_8.draw_on_frame(battery_level, frame, offset_x_battery_level, 0, COLOR_WHITE)
 
 def run_app():
     if app_pointer < 0:
@@ -95,8 +108,8 @@ def run_app():
     frame = screen.get_framebuffer()
     frame.fill(0)
     # draw icon
-    offset_x_icon = (screen.get_size()[0] - ICON_SIZE[0]) // 2
-    offset_y_icon = (screen.get_size()[1] - ICON_SIZE[1]) // 2
+    offset_x_icon = (SCR_W - ICON_SIZE_W) // 2
+    offset_y_icon = (SCR_H - ICON_SIZE_H) // 2
     frame.blit(display_icon, offset_x_icon, offset_y_icon)
     screen.refresh()
     # reset and run
@@ -111,7 +124,10 @@ def main_loop():
     KEY_A = keypad.KEY_A
     KEY_B = keypad.KEY_B
     SIZE = len(app_list)
+    t_update_battery_ms = ticks_ms()
+    cpu.set_cpu_speed(cpu.VERY_SLOW)
     while True:
+        should_refresh_screen = False
         for event in get_key_event():
             event_type, key = parse_key_event(event)
             if event_type == keypad.EVENT_KEY_PRESS:
@@ -123,10 +139,22 @@ def main_loop():
                 if key == KEY_LEFT or key == KEY_RIGHT:
                     if 0 > app_pointer or SIZE <= app_pointer:
                         app_pointer = (app_pointer + SIZE) % SIZE
-                    render_point_app()
+                    with cpu.cpu_speed_context(cpu.FAST):
+                        render_point_app()
+                        render_battery_level()
+                    should_refresh_screen = True
                 if key == KEY_A:
                     run_app()
                 if key == KEY_B:
                     # entering setup mode
                     app.call_component("ftp_mode")
                     app.reset_and_run_app("") # reset
+        if ticks_diff(ticks_ms(), t_update_battery_ms) >= 5000:
+            t_update_battery_ms = ticks_add(t_update_battery_ms, 5000)
+            with cpu.cpu_speed_context(cpu.FAST):
+                render_battery_level()
+            should_refresh_screen = True
+        else:
+            battery.measure()
+        if should_refresh_screen:
+            screen.refresh()
