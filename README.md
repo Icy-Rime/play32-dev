@@ -7,6 +7,6 @@ machine: only machine.Timer works as expected.
 WIP
 
 # Useage
-- copy `main.py` into your play32 app dir.
+- copy `main.py` into your play32 app dir. e.g. put into `play32_framewor/apps` folder
 - modify line `PLAY32DEV_PATH` to the correct value.
 - run main.py to run your play32 app.
