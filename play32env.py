@@ -2,7 +2,7 @@
 import os, sys
 
 PLAY32DEV_PATH = os.path.dirname(os.path.abspath(__file__))
-def setup(current_app_dir_path):
+def setup(app_dir):
     # replace builtin modules
     global os, sys
     sdk_path=PLAY32DEV_PATH
@@ -10,13 +10,16 @@ def setup(current_app_dir_path):
     data_path = os.path.join(sdk_path, "data")
     tmp_path = os.path.join(sdk_path, "tmp")
     component_path = os.path.join(sdk_path, "components")
-    app_lib_path = os.path.join(current_app_dir_path, "lib")
-    app_name = os.path.basename(current_app_dir_path)
-    apps_base_dir_path = os.path.abspath(os.path.join(current_app_dir_path, ".."))
+    # app_lib_path = os.path.join(current_app_dir_path, "lib")
+    # app_name = os.path.basename(current_app_dir_path)
+    # apps_base_dir_path = os.path.abspath(os.path.join(current_app_dir_path, ".."))
+    apps_base_dir_path = os.path.abspath(app_dir)
     sys.path.append(sdk_path)
     sys.path.append(lib_path)
-    sys.path.insert(0, app_lib_path)
-    sys.path.insert(0, current_app_dir_path)
+    # sys.path.insert(0, app_lib_path)
+    # sys.path.insert(0, current_app_dir_path)
+    sys.path.insert(0, ".")
+    sys.path.insert(0, "lib")
     import ucmath, umath, ugc, uarray, uasyncio, ubinascii, ucollections
     import uerrno, uhashlib, uheapq, uio, ujson
     import uos, ure, uselect, usocket, ussl
@@ -74,10 +77,6 @@ def setup(current_app_dir_path):
     # setup
     from play32sys import path
     path._update_base_path(sdk_path, apps_base_dir_path, data_path, tmp_path, component_path)
-    import hal_screen, hal_keypad, hal_buzz, hal_led, hal_battery
-    hal_screen.init()
-    hal_keypad.init()
-    hal_buzz.init()
-    hal_led.init()
-    hal_battery.init()
-    return app_name
+    # start
+    from play32sys import app
+    app._on_boot_(True)

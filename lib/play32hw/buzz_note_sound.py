@@ -11,6 +11,7 @@ from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from pygame import midi as pyg_midi
 pyg_midi.init()
+_pyg_output = pyg_midi.Output(0)
 
 TYPE_EMIT_EVENT = const(0X00)
 TYPE_SET_TEMPO = const(0X01)
@@ -69,7 +70,7 @@ class BuzzPlayer():
         # status
         self.__is_playing = False
         # CPython
-        self.__output = pyg_midi.Output(0)
+        self.__output = _pyg_output
         self.__output.set_instrument(26)
         # self.__output = mido.open_output()
         # self.__output.send(mido.Message('program_change', program=2))
