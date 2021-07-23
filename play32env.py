@@ -77,6 +77,12 @@ def setup(app_dir):
     # setup
     from play32sys import path
     path._update_base_path(sdk_path, apps_base_dir_path, data_path, tmp_path, component_path)
+
+def start():
     # start
     from play32sys import app
     app._on_boot_(True)
+
+def start_app(app_name=None, *app_args, **app_kws):
+    from play32sys import app
+    app._on_boot_(True, app_name, *app_args, **app_kws)

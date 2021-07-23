@@ -18,5 +18,7 @@ def mem_alloc():
 def mem_free():
     return _max_mem
 
-def threshold(amount=0):
+def threshold(amount=None):
+    if amount == None:
+        return 2097152
     pass

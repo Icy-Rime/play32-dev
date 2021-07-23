@@ -76,3 +76,13 @@ def parse_key_event(event):
 
 def is_key_pressed(key):
     return get_key_value(key) == 0
+
+def clear_key_status(keys):
+    for k in keys:
+        __key_status[k] = False
+
+def enable_wake_on_press0(key=None):
+    pass
+
+def enable_wake_on_press1(keys=None):
+    pass

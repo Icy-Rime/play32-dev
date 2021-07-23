@@ -87,7 +87,7 @@ class Pin():
         pass
     def off(self):
         pass
-    def irq(handler=None, trigger=IRQ_FALLING | IRQ_RISING, *, priority=1, wake=None, hard=False):
+    def irq(self, handler=None, trigger=IRQ_FALLING | IRQ_RISING, *, priority=1, wake=None, hard=False):
         pass
 
 class Signal():

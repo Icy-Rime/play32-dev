@@ -5,4 +5,8 @@
 !.vscode/extensions.json
 __pycache__
 .build
-lib/ble
+data/**
+!data/hw_config.json
+!data/sys_config.json
+!data/battery.dat
+tmp/**
