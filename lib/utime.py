@@ -10,10 +10,13 @@ def gmtime(secs=None):
     if secs == None:
         secs = int(cpy_time.time()) - __EPOCH_TIME_DIFFER
     st = cpy_time.gmtime(secs + __EPOCH_TIME_DIFFER)
-    print(st.tm_gmtoff, st.tm_zone)
     return (st.tm_year, st.tm_mon, st.tm_mday, st.tm_hour, st.tm_min, st.tm_sec, st.tm_wday, st.tm_yday)
 
-localtime = gmtime # no time zone support
+def localtime(secs=None):
+    if secs == None:
+        secs = int(cpy_time.time()) - __EPOCH_TIME_DIFFER
+    st = cpy_time.localtime(secs + __EPOCH_TIME_DIFFER)
+    return (st.tm_year, st.tm_mon, st.tm_mday, st.tm_hour, st.tm_min, st.tm_sec, st.tm_wday, st.tm_yday)
 
 def mktime(t):
     assert len(t) == 8

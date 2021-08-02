@@ -17,16 +17,17 @@ def ilistdir(dir="."):
     for l in lst:
         pth = os.path.join(dir, l)
         ftype = 0x4000 if os.path.isdir(pth) else 0x8000
-        fsize = -1 if os.path.isdir(pth) else os.path.getsize(pth)
+        fsize = 0 if os.path.isdir(pth) else os.path.getsize(pth)
         yield (l, ftype, 0, fsize)
 mkdir = os.mkdir
 remove = os.remove
 rmdir = os.rmdir
 rename = os.rename
 def stat(pth):
+    s = os.stat(pth)
     ftype = 0x4000 if os.path.isdir(pth) else 0x8000
-    fsize = -1 if os.path.isdir(pth) else os.path.getsize(pth)
-    return (ftype, 0, 0, 0, 0, 0, fsize, 0, 0, 0)
+    fsize = 0 if os.path.isdir(pth) else os.path.getsize(pth)
+    return (ftype, 0, 0, 0, 0, 0, fsize, s[7]-946684800, s[8]-946684800, s[9]-946684800)
 def statvfs(_):
     return (4096, 4096, 512, 505, 505, 0, 0, 0, 0, 255)
 def sync():
