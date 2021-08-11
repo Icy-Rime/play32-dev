@@ -20,101 +20,101 @@ Color = int
 
 class AbstractFormat(object):
     def __init__(self, buffer, width, height, format, stride = None):
-        self.buffer = buffer
-        self.width = width
-        self.height = height
-        self.format = format
-        self.stride = stride if stride else width
+        self._buffer = buffer
+        self._width = width
+        self._height = height
+        self._format = format
+        self._stride = stride if stride else width
         pass
     def _set_pixel(self, x, y, c): pass
     def _get_pixel(self, x, y): pass
     def _fill_rect(self, x, y, w, h, c): pass
     def __repr__(self):
-        txt = '<framebuffer.FrameBuffer object Width: {:}, Height: {:}>\n'.format(self.width, self.height)
-        for y in range(self.height):
-            for x in range(self.width):
+        txt = '<framebuffer.FrameBuffer object Width: {:}, Height: {:}>\n'.format(self._width, self._height)
+        for y in range(self._height):
+            for x in range(self._width):
                 txt += '██' if self._get_pixel(x, y) != 0 else '  '
             txt += '\n'
         return txt[:-1]
 
 class FormatMonoVertical(AbstractFormat):
     def _set_pixel(self, x, y, c):
-        index = (y >> 3) * self.stride + x
-        offset = y & 0x07 if self.format == MONO_VLSB else 7 - (y & 0x07)
-        self.buffer[index] = (self.buffer[index] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
+        index = (y >> 3) * self._stride + x
+        offset = y & 0x07 if self._format == MONO_VLSB else 7 - (y & 0x07)
+        self._buffer[index] = (self._buffer[index] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
     def _get_pixel(self, x, y):
-        index = (y >> 3) * self.stride + x
-        offset = y & 0x07 if self.format == MONO_VLSB else 7 - (y & 0x07)
-        return (self.buffer[index] >> offset) & 0x01
+        index = (y >> 3) * self._stride + x
+        offset = y & 0x07 if self._format == MONO_VLSB else 7 - (y & 0x07)
+        return (self._buffer[index] >> offset) & 0x01
     def _fill_rect(self, x, y, w, h, c):
-        reverse = self.format == MONO_VLSB
+        reverse = self._format == MONO_VLSB
         while h > 0:
             h -= 1
-            bp = (y >> 3) * self.stride + x
+            bp = (y >> 3) * self._stride + x
             offset = y & 0x07 if reverse else 7 - (y & 0x07)
             for _ in range(w, 0, -1):
-                self.buffer[bp] = (self.buffer[bp] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
+                self._buffer[bp] = (self._buffer[bp] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
                 bp += 1
             y += 1
 class FormatMonoHorizontal(AbstractFormat):
     def _set_pixel(self, x, y, c):
-        index = (x + y * self.stride) >> 3
-        offset = x & 0x07 if self.format == MONO_HMSB else 7 - (x & 0x07)
-        self.buffer[index] = (self.buffer[index] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
+        index = (x + y * self._stride) >> 3
+        offset = x & 0x07 if self._format == MONO_HMSB else 7 - (x & 0x07)
+        self._buffer[index] = (self._buffer[index] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
     def _get_pixel(self, x, y):
-        index = (x + y * self.stride) >> 3
-        offset = x & 0x07 if self.format == MONO_HMSB else 7 - (x & 0x07)
-        return (self.buffer[index] >> offset) & 0x01
+        index = (x + y * self._stride) >> 3
+        offset = x & 0x07 if self._format == MONO_HMSB else 7 - (x & 0x07)
+        return (self._buffer[index] >> offset) & 0x01
     def _fill_rect(self, x, y, w, h, c):
-        reverse = self.format == MONO_HMSB
-        advance = self.stride >> 3
+        reverse = self._format == MONO_HMSB
+        advance = self._stride >> 3
         while w > 0:
             w -= 1
             bp = (x >> 3) + y * advance
             offset = x & 7 if reverse else 7 - (x & 7)
             for _ in range(h, 0, -1):
-                self.buffer[bp] = (self.buffer[bp] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
+                self._buffer[bp] = (self._buffer[bp] & ~(0x01 << offset)) | ((1 if c != 0 else 0) << offset)
                 bp += advance
             x += 1
 class FormatRGB565(AbstractFormat):
     def _set_pixel(self, x, y, c):
-        offset = (x + y*self.stride) * 2 # 16bit
-        self.buffer[offset:offset+2] = c.to_bytes(2, 'little')
+        offset = (x + y*self._stride) * 2 # 16bit
+        self._buffer[offset:offset+2] = c.to_bytes(2, 'little')
     def _get_pixel(self, x, y):
-        offset = (x + y*self.stride) * 2
-        return int.from_bytes(self.buffer[offset:offset+2], 'little')
+        offset = (x + y*self._stride) * 2
+        return int.from_bytes(self._buffer[offset:offset+2], 'little')
     def _fill_rect(self, x, y, w, h, c):
-        bp = (x + y*self.stride) * 2
+        bp = (x + y*self._stride) * 2
         while h > 0:
             h -= 1
             for _ in range(w, 0, -1):
-                self.buffer[bp:bp+2] = c.to_bytes(2, 'little')
+                self._buffer[bp:bp+2] = c.to_bytes(2, 'little')
                 bp += 2
-            bp += (self.stride - w) * 2
+            bp += (self._stride - w) * 2
 
 class FrameBuffer(object):
     def __init__(self, buffer, width, height, format, stride = None):
-        self.buffer = buffer
-        self.width = width
-        self.height = height
-        self.format = format
-        self.stride = stride if stride else width
-        if self.format == MONO_HMSB or self.format == MONO_HLSB:
-            self.stride = (self.stride + 7) & ~7
-            self.__format = FormatMonoHorizontal(self.buffer, self.width, self.height, self.format, self.stride)
-        elif self.format == MONO_VMSB or self.format == MONO_VLSB:
-            self.__format = FormatMonoVertical(self.buffer, self.width, self.height, self.format, self.stride)
-        elif self.format == RGB565:
-            self.__format = FormatRGB565(self.buffer, self.width, self.height, self.format, self.stride)
+        self._buffer = buffer
+        self._width = width
+        self._height = height
+        self._format = format
+        self._stride = stride if stride else width
+        if self._format == MONO_HMSB or self._format == MONO_HLSB:
+            self._stride = (self._stride + 7) & ~7
+            self.__format = FormatMonoHorizontal(self._buffer, self._width, self._height, self._format, self._stride)
+        elif self._format == MONO_VMSB or self._format == MONO_VLSB:
+            self.__format = FormatMonoVertical(self._buffer, self._width, self._height, self._format, self._stride)
+        elif self._format == RGB565:
+            self.__format = FormatRGB565(self._buffer, self._width, self._height, self._format, self._stride)
         else:
-            self.__format = FormatRGB565(self.buffer, self.width, self.height, self.format, self.stride)
+            self.__format = FormatRGB565(self._buffer, self._width, self._height, self._format, self._stride)
             print('Warning: this framebuf fotmat is not implement yet, use RGB565 instead.')
     def __repr__(self):
         return self.__format.__repr__()
     def fill(self, c):
-        self.__format._fill_rect(0, 0, self.width, self.height, c)
+        self.__format._fill_rect(0, 0, self._width, self._height, c)
     def pixel(self, x, y, c=None):
-        if 0 <= x and x < self.width and 0 <= y and y < self.height:
+        if 0 <= x and x < self._width and 0 <= y and y < self._height:
             if c == None:
                 return self.__format._get_pixel(x, y)
             else:
@@ -153,17 +153,17 @@ class FrameBuffer(object):
         e = 2 * dy - dx
         for i in range(dx):# (mp_int_t i = 0; i < dx; ++i) {
             if steep:
-                if 0 <= y1 and y1 < self.width and 0 <= x1 and x1 < self.height:
+                if 0 <= y1 and y1 < self._width and 0 <= x1 and x1 < self._height:
                     self.__format._set_pixel(y1, x1, c)
             else:
-                if 0 <= x1 and x1 < self.width and 0 <= y1 and y1 < self.height:
+                if 0 <= x1 and x1 < self._width and 0 <= y1 and y1 < self._height:
                     self.__format._set_pixel(x1, y1, c)
             while e >= 0:
                 y1 += sy
                 e -= 2 * dx
             x1 += sx
             e += 2 * dy
-        if 0 <= x2 and x2 < self.width and 0 <= y2 and y2 < self.height:
+        if 0 <= x2 and x2 < self._width and 0 <= y2 and y2 < self._height:
             self.__format._set_pixel(x2, y2, c)
     def rect(self, x, y, w, h, c):
         self.fill_rect(x, y, w, 1, c)
@@ -171,13 +171,13 @@ class FrameBuffer(object):
         self.fill_rect(x, y, 1, h, c)
         self.fill_rect(x + w - 1, y, 1, h, c)
     def fill_rect(self, x, y, w, h, c):
-        xend = MIN(self.width, x + w)
-        yend = MIN(self.height, y + h)
+        xend = MIN(self._width, x + w)
+        yend = MIN(self._height, y + h)
         x = MAX(x, 0)
         y = MAX(y, 0)
         self.__format._fill_rect(x, y, xend - x, yend - y, c)
     def blit(self, fbuf, x, y, key=None):
-        if (x >= self.width) or (y >= self.height) or (-x >= fbuf.width) or (-y >= fbuf.height):
+        if (x >= self._width) or (y >= self._height) or (-x >= fbuf.width) or (-y >= fbuf.height):
             # Out of bounds, no-op.
             return
         # Clip.
@@ -185,8 +185,8 @@ class FrameBuffer(object):
         y0 = MAX(0, y)
         x1 = MAX(0, -x)
         y1 = MAX(0, -y)
-        x0end = MIN(self.width, x + fbuf.width)
-        y0end = MIN(self.height, y + fbuf.height)
+        x0end = MIN(self._width, x + fbuf.width)
+        y0end = MIN(self._height, y + fbuf.height)
         # for (; y0 < y0end; ++y0)
         while y0 < y0end:
             cx1 = x1
@@ -202,18 +202,18 @@ class FrameBuffer(object):
     def scroll(self, xstep, ystep):
         if xstep < 0:
             sx = 0
-            xend = self.width + xstep
+            xend = self._width + xstep
             dx = 1
         else:
-            sx = self.width - 1
+            sx = self._width - 1
             xend = xstep - 1
             dx = -1
         if ystep < 0:
             y = 0
-            yend = self.height + ystep
+            yend = self._height + ystep
             dy = 1
         else:
-            y = self.height - 1
+            y = self._height - 1
             yend = ystep - 1
             dy = -1
         while y != yend:
@@ -231,12 +231,12 @@ class FrameBuffer(object):
             # chr_data = font_petme128_8x8[(chr - 32) * 8: (chr - 32) * 8 + 8]
             # loop over char data
             for j in range(8):
-                if 0 <= x and x < self.width: # clip x
+                if 0 <= x and x < self._width: # clip x
                     vline_data = font_petme128_8x8[chr_data_offset+j]; # each byte is a column of 8 pixels, LSB at top
                     m_y = y
                     while vline_data > 0:
                         if vline_data & 1: # only draw if pixel set
-                            if 0 <= m_y and m_y < self.height: # clip y
+                            if 0 <= m_y and m_y < self._height: # clip y
                                 self.__format._set_pixel(x, m_y, c)
                         m_y += 1
                         vline_data >>= 1
