@@ -31,7 +31,7 @@ def __save_dict():
         usys.print_exception(e)
 
 # system function
-def _on_boot_(_debug=False, app_name=None, *app_args, **app_kws):
+def _on_boot_(app_name=None, *app_args, **app_kws):
     __init_dict()
     # >>>> init screen <<<<
     import hal_screen
@@ -55,13 +55,8 @@ def _on_boot_(_debug=False, app_name=None, *app_args, **app_kws):
     clear_temporary_dir()
     if isinstance(boot_app, str) and boot_app != "":
         # app.clear_boot_app()
-        try:
-            gc.collect()
-            run_app(boot_app, *args, **kws)
-        except Exception as e:
-            usys.print_exception(e)
-            if not _debug:
-                reset_and_run_app("")
+        gc.collect()
+        run_app(boot_app, *args, **kws)
     else:
         call_component('app_selector')
     print("Program ended, entering REPL mode when running on Play32.")

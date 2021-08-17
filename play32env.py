@@ -81,8 +81,8 @@ def setup(app_dir):
 def start():
     # start
     from play32sys import app
-    app._on_boot_(True)
+    app._on_boot_()
 
 def start_app(app_name=None, *app_args, **app_kws):
     from play32sys import app
-    app._on_boot_(True, app_name, *app_args, **app_kws)
+    app._on_boot_(app_name, *app_args, **app_kws)
