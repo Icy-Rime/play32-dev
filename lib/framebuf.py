@@ -29,13 +29,6 @@ class AbstractFormat(object):
     def _set_pixel(self, x, y, c): pass
     def _get_pixel(self, x, y): pass
     def _fill_rect(self, x, y, w, h, c): pass
-    def __repr__(self):
-        txt = '<framebuffer.FrameBuffer object Width: {:}, Height: {:}>\n'.format(self._width, self._height)
-        for y in range(self._height):
-            for x in range(self._width):
-                txt += '██' if self._get_pixel(x, y) != 0 else '  '
-            txt += '\n'
-        return txt[:-1]
 
 class FormatMonoVertical(AbstractFormat):
     def _set_pixel(self, x, y, c):
@@ -109,12 +102,27 @@ class FrameBuffer(object):
         else:
             self.__format = FormatRGB565(self._buffer, self._width, self._height, self._format, self._stride)
             print('Warning: this framebuf fotmat is not implement yet, use RGB565 instead.')
+        self._x = 0
+        self._y = 0
+        self._w = width
+        self._h = height
     def __repr__(self):
-        return self.__format.__repr__()
+        txt = '<framebuffer.FrameBuffer object Width: {:}, Height: {:}>\n'.format(self._width, self._height)
+        for y in range(self._y, self._y+self._h):
+            for x in range(self._x, self._x+self._w):
+                txt += '██' if self.__format._get_pixel(x, y) != 0 else '  '
+            txt += '\n'
+        return txt[:-1]
     def fill(self, c):
-        self.__format._fill_rect(0, 0, self._width, self._height, c)
+        self.__format._fill_rect(self._x, self._y, self._w, self._h, c)
     def pixel(self, x, y, c=None):
-        if 0 <= x and x < self._width and 0 <= y and y < self._height:
+        xstart = self._x
+        ystart = self._y
+        x = x + xstart
+        y = y + ystart
+        xend = xstart + self._w
+        yend = ystart + self._h
+        if xstart <= x and x < xend and ystart <= y and y < yend:
             if c == None:
                 return self.__format._get_pixel(x, y)
             else:
@@ -123,8 +131,16 @@ class FrameBuffer(object):
     def hline(self, x, y, w, c):
         self.fill_rect(x, y, w, 1, c)
     def vline(self, x, y, h, c):
-        self.fill_rect(x, y, h, 1, c)
+        self.fill_rect(x, y, 1, h, c)
     def line(self, x1, y1, x2, y2, c):
+        xstart = self._x
+        ystart = self._y
+        x1 = x1 + xstart
+        y1 = y1 + ystart
+        x2 = x2 + xstart
+        y2 = y2 + ystart
+        xend = xstart + self._w
+        yend = ystart + self._h
         dx = x2 - x1
         if dx > 0:
             sx = 1
@@ -153,17 +169,17 @@ class FrameBuffer(object):
         e = 2 * dy - dx
         for i in range(dx):# (mp_int_t i = 0; i < dx; ++i) {
             if steep:
-                if 0 <= y1 and y1 < self._width and 0 <= x1 and x1 < self._height:
+                if xstart <= y1 and y1 < xend and ystart <= x1 and x1 < yend:
                     self.__format._set_pixel(y1, x1, c)
             else:
-                if 0 <= x1 and x1 < self._width and 0 <= y1 and y1 < self._height:
+                if xstart <= x1 and x1 < xend and ystart <= y1 and y1 < yend:
                     self.__format._set_pixel(x1, y1, c)
             while e >= 0:
                 y1 += sy
                 e -= 2 * dx
             x1 += sx
             e += 2 * dy
-        if 0 <= x2 and x2 < self._width and 0 <= y2 and y2 < self._height:
+        if xstart <= x2 and x2 < xend and ystart <= y2 and y2 < yend:
             self.__format._set_pixel(x2, y2, c)
     def rect(self, x, y, w, h, c):
         self.fill_rect(x, y, w, 1, c)
@@ -171,22 +187,39 @@ class FrameBuffer(object):
         self.fill_rect(x, y, 1, h, c)
         self.fill_rect(x + w - 1, y, 1, h, c)
     def fill_rect(self, x, y, w, h, c):
-        xend = MIN(self._width, x + w)
-        yend = MIN(self._height, y + h)
-        x = MAX(x, 0)
-        y = MAX(y, 0)
+        xstart = self._x
+        ystart = self._y
+        x = x + xstart
+        y = y + ystart
+        xend = xstart + self._w
+        yend = ystart + self._h
+        if h < 1 or w < 1 or x + w <= xstart or y + h <= ystart or y >= yend or x >= xend:
+            # No operation needed.
+            return
+        xend = MIN(xend, x + w)
+        yend = MIN(yend, y + h)
+        x = MAX(x, xstart)
+        y = MAX(y, ystart)
         self.__format._fill_rect(x, y, xend - x, yend - y, c)
     def blit(self, fbuf, x, y, key=None):
-        if (x >= self._width) or (y >= self._height) or (-x >= fbuf.width) or (-y >= fbuf.height):
+        selfxstart = self._x
+        selfystart = self._y
+        selfw = self._w
+        selfh = self._h
+        sourcexstart = fbuf._x
+        sourceystart = fbuf._y
+        sourcew = fbuf._w
+        sourceh = fbuf._h
+        if (x >= selfw) or (y >= selfh) or (-x >= sourcew) or (-y >= sourceh):
             # Out of bounds, no-op.
             return
         # Clip.
-        x0 = MAX(0, x)
-        y0 = MAX(0, y)
-        x1 = MAX(0, -x)
-        y1 = MAX(0, -y)
-        x0end = MIN(self._width, x + fbuf.width)
-        y0end = MIN(self._height, y + fbuf.height)
+        x0 = MAX(selfxstart, x + selfxstart)
+        y0 = MAX(selfystart, y + selfystart)
+        x1 = MAX(sourcexstart, sourcexstart - x)
+        y1 = MAX(sourceystart, sourceystart - y)
+        x0end = MIN(selfxstart + selfw, x + selfxstart + sourcew)
+        y0end = MIN(selfystart + selfh, y + selfystart + sourceh)
         # for (; y0 < y0end; ++y0)
         while y0 < y0end:
             cx1 = x1
@@ -200,27 +233,37 @@ class FrameBuffer(object):
     
     # not require function below
     def scroll(self, xstep, ystep):
+        xstart = self._x
+        ystart = self._y
+        xend = xstart + self._w
+        yend = ystart + self._h
         if xstep < 0:
-            sx = 0
-            xend = self._width + xstep
+            sx = xstart
+            xend = MAX(xstart, xend + xstep)
             dx = 1
         else:
-            sx = self._width - 1
-            xend = xstep - 1
+            sx = xend - 1
+            xend = MIN(xend - 1, xstart + xstep - 1)
             dx = -1
         if ystep < 0:
-            y = 0
-            yend = self._height + ystep
+            y = ystart
+            yend = MAX(ystart, yend + ystep)
             dy = 1
         else:
-            y = self._height - 1
-            yend = ystep - 1
+            y = yend - 1
+            yend = MIN(yend - 1, ystart + ystep - 1)
             dy = -1
         while y != yend:
             for x in range(sx, xend, dx):
                 self.__format._set_pixel(x, y, self.__format._get_pixel(x - xstep, y - ystep))
             y += dy
     def text(self, t:str, x, y, c=1):
+        xstart = self._x
+        ystart = self._y
+        x = x + xstart
+        y = y + ystart
+        xend = xstart + self._w
+        yend = ystart + self._h
         # loop over chars
         for chr in t.encode():
             # get char and make sure its in range of font
@@ -231,13 +274,34 @@ class FrameBuffer(object):
             # chr_data = font_petme128_8x8[(chr - 32) * 8: (chr - 32) * 8 + 8]
             # loop over char data
             for j in range(8):
-                if 0 <= x and x < self._width: # clip x
+                if xstart <= x and x < xend: # clip x
                     vline_data = font_petme128_8x8[chr_data_offset+j]; # each byte is a column of 8 pixels, LSB at top
                     m_y = y
                     while vline_data > 0:
                         if vline_data & 1: # only draw if pixel set
-                            if 0 <= m_y and m_y < self._height: # clip y
+                            if ystart <= m_y and m_y < yend: # clip y
                                 self.__format._set_pixel(x, m_y, c)
                         m_y += 1
                         vline_data >>= 1
                 x += 1
+    def subframe(self, x, y, w, h):
+        xstart = self._x
+        ystart = self._y
+        x = x + xstart
+        y = y + ystart
+        xend = xstart + self._w
+        yend = ystart + self._h
+        if w < 1 or h < 1 or x < xstart or y < ystart or x + w > xend or y + h > yend:
+            return None
+        frame = FrameBuffer(self._buffer, self._width, self._height, self._format, self._stride)
+        frame._x = x
+        frame._y = y
+        frame._w = w
+        frame._h = h
+        return frame
+    def get_size(self):
+        return self._w, self._h
+    def get_format(self):
+        return self._format
+    def get_buffer(self):
+        return self._buffer
