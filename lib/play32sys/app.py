@@ -112,7 +112,7 @@ def render_boot_image():
         frame.fill(0)
         frame.blit(image, (sw - iw) // 2, (sh - ih) // 2, 0)
         hal_screen.refresh()
-        del idata, image, iw, ih, sw, sh, ifm
+        del idata, image, iw, ih, sw, sh
         return True
     return False
 
@@ -140,7 +140,7 @@ def reset_and_run_app(app_name, *args, **kws):
     if render_boot_image():
         disable_boot_image()
     # __soft_reset()
-    _on_boot_(True)
+    _on_boot_(app_name, True)
 
 def run_app(app_name, *args, **kws):
     curr = uos.getcwd()

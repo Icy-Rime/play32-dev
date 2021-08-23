@@ -77,6 +77,8 @@ def setup(app_dir):
     # setup
     from play32sys import path
     path._update_base_path(sdk_path, apps_base_dir_path, data_path, tmp_path, component_path)
+    from buildin_resource.font import _update_base
+    _update_base(sdk_path)
 
 def start():
     # start
