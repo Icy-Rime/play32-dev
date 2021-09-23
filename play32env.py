@@ -27,9 +27,9 @@ def setup(app_dir):
     import btree, framebuf, machine, micropython, network
     import ubluetooth, ucryptolib, uctypes
     # no-prefix
-    sys.modules["cmath"] = ucmath # no alias
+    # sys.modules["cmath"] = ucmath # no alias
     sys.modules["gc"] = ugc # no alias
-    sys.modules["math"] = umath # no alias
+    # sys.modules["math"] = umath # no alias
     # sys.modules["array"] = uarray
     # sys.modules["binascii"] = ubinascii
     # sys.modules["collections"] = ucollections

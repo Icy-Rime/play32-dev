@@ -1,6 +1,6 @@
 import uos, usys, ujson
 from play32sys.path import join, get_tmp_path, get_app_path, get_component_path, clear_temporary_dir
-from resource.image import PLAY32_ICON
+from buildin_resource.image import DEFAULT_BOOT_ICON
 import gc
 
 VERSION = (1, 16, 0)
@@ -88,12 +88,12 @@ def render_boot_image():
     if boot_image_path == None:
         import hal_screen
         hal_screen.refresh()
-        boot_image_path = PLAY32_ICON
+        boot_image_path = DEFAULT_BOOT_ICON
     if boot_image_path != "":
         from graphic import framebuf_helper
         import framebuf, hal_screen
-        if boot_image_path == PLAY32_ICON:
-            from resource.image.play32_icon import PLAY32_ICON_DATA
+        if boot_image_path == DEFAULT_BOOT_ICON:
+            from buildin_resource.image.play32_icon import PLAY32_ICON_DATA
             iw, ih, idata = PLAY32_ICON_DATA
         else:
             from graphic import pbm
@@ -136,7 +136,7 @@ def clear_boot_image():
 def reset_and_run_app(app_name, *args, **kws):
     set_boot_app(app_name, *args, **kws)
     if get_boot_image() == None:
-        set_boot_image(PLAY32_ICON)
+        set_boot_image(DEFAULT_BOOT_ICON)
     if render_boot_image():
         disable_boot_image()
     # __soft_reset()
@@ -145,6 +145,7 @@ def reset_and_run_app(app_name, *args, **kws):
 def run_app(app_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_app_path(app_name))
+    usys.path.append(get_app_path(app_name))
     try:
         module = __import__("appmain")
         if "appmain" in usys.modules:
@@ -152,11 +153,13 @@ def run_app(app_name, *args, **kws):
         return module.main(app_name, *args, **kws)
     finally:
         uos.chdir(curr)
+        usys.path.remove(get_app_path(app_name))
         gc.collect()
 
 def call_component(component_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_component_path(component_name))
+    usys.path.append(get_component_path(component_name))
     try:
         module = __import__("appmain")
         if "appmain" in usys.modules:
@@ -164,6 +167,7 @@ def call_component(component_name, *args, **kws):
         return module.main(component_name, *args, **kws)
     finally:
         uos.chdir(curr)
+        usys.path.remove(get_component_path(component_name))
         gc.collect()
 
 # debug function
