@@ -145,12 +145,14 @@ def reset_and_run_app(app_name, *args, **kws):
 def run_app(app_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_app_path(app_name))
-    usys.path.append(get_app_path(app_name))
+    usys.path.insert(0, get_app_path(app_name))
     try:
-        module = __import__("appmain")
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
-        return module.main(app_name, *args, **kws)
+        module = __import__("appmain")
+        res = module.main(app_name, *args, **kws)
+        del module
+        return res
     finally:
         uos.chdir(curr)
         usys.path.remove(get_app_path(app_name))
@@ -159,12 +161,14 @@ def run_app(app_name, *args, **kws):
 def call_component(component_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_component_path(component_name))
-    usys.path.append(get_component_path(component_name))
+    usys.path.insert(0, get_component_path(component_name))
     try:
-        module = __import__("appmain")
         if "appmain" in usys.modules:
             del usys.modules["appmain"]
-        return module.main(component_name, *args, **kws)
+        module = __import__("appmain")
+        res = module.main(component_name, *args, **kws)
+        del module
+        return res
     finally:
         uos.chdir(curr)
         usys.path.remove(get_component_path(component_name))
