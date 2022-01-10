@@ -21,7 +21,7 @@ def get_size():
 def get_format():
     return __format
 
-def get_framebuffer():
+def get_framebuffer() -> framebuf.FrameBuffer:
     return __screen
 
 def refresh(x=0, y=0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT):
