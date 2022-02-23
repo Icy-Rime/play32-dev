@@ -130,7 +130,7 @@ class DAC():
         pass
 
 class PWM():
-    def __init__(self, dest, *, freq=20000, duty=0):
+    def __init__(self, dest, *, freq=20000, duty=0, duty_u16=0, duty_ns=0):
         pass
     def init(self, freq=20000, duty=0):
         pass
@@ -140,6 +140,12 @@ class PWM():
         if val == None:
             return 20000
     def duty(self, val=None):
+        if val == None:
+            return 0
+    def duty_u16(self, val=None):
+        if val == None:
+            return 65535
+    def duty_ns(self, val=None):
         if val == None:
             return 0
 
