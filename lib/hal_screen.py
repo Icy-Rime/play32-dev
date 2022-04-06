@@ -25,7 +25,4 @@ def get_framebuffer() -> framebuf.FrameBuffer:
     return __screen
 
 def refresh(x=0, y=0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT):
-    if isinstance(x, dict) and isinstance(y, list):
-        context = x
-        effect_area = y
     __screen.show()
