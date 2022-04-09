@@ -146,6 +146,7 @@ def run_app(app_name, *args, **kws):
     curr = uos.getcwd()
     uos.chdir(get_app_path(app_name))
     usys.path.insert(0, get_app_path(app_name))
+    usys.path.insert(0, join(get_app_path(app_name), "lib"))
     try:
         if "appmain" in usys.modules:
             del usys.modules["appmain"]

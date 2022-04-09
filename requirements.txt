@@ -1,4 +1,4 @@
-pygame==2.0.1
-requests==2.25.1
-pyaes==1.6.1
-Pillow==8.2.0
+pygame>=2.0.1
+requests>=2.25.1
+pyaes>=1.6.1
+Pillow>=8.2.0
