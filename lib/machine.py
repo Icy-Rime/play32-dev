@@ -26,15 +26,17 @@ def freq(hz=None):
     if hz == None:
         return 240_000_000
 def idle():
-    print("idle, but won`t affact anything on CPython")
+    # print("idle, but won`t affact anything on CPython")
+    pass
 def sleep():
-    print("sleep, but won`t affact anything on CPython")
+    # print("sleep, but won`t affact anything on CPython")
+    pass
 def lightsleep(ms=None):
-    print("lightsleep, but won`t affact anything on CPython")
+    # print("lightsleep, but won`t affact anything on CPython")
     if ms != None:
         cpy_time.sleep(ms / 1000)
 def deepsleep(ms=None):
-    print("deepsleep, but won`t affact anything on CPython")
+    # print("deepsleep, but won`t affact anything on CPython")
     if ms != None:
         cpy_time.sleep(ms / 1000)
     reset()
