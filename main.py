@@ -1,5 +1,5 @@
 import os, sys
-PLAY32DEV_PATH = "D:\CODE\Python\play32_dev"
+PLAY32DEV_PATH = "/run/media/dreagonmon/Data/Code/Python/play32-dev"
 sys.path.append(PLAY32DEV_PATH)
 import play32env
 if __name__ == "__main__":

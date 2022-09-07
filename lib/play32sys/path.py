@@ -8,15 +8,13 @@ __ROOT_BASE = '/'
 __APP_BASE = '/apps'
 __DATA_BASE = '/data'
 __TMP_BASE = '/tmp'
-__COMPONENT_BASE = '/components'
 
 def _update_base_path(root, app, data, tmp, component):
-    global __ROOT_BASE, __APP_BASE, __DATA_BASE, __TMP_BASE, __COMPONENT_BASE
+    global __ROOT_BASE, __APP_BASE, __DATA_BASE, __TMP_BASE
     __ROOT_BASE = root
     __APP_BASE = app
     __DATA_BASE = data
     __TMP_BASE = tmp
-    __COMPONENT_BASE = component
     __ensure_dir__()
 
 class TemporaryFileContext():
@@ -78,12 +76,6 @@ def get_tmp_path(name='/'):
         return __TMP_BASE
     else:
         return join(__TMP_BASE, name)
-
-def get_component_path(name='/'):
-    if name == '/':
-        return __COMPONENT_BASE
-    else:
-        return join(__COMPONENT_BASE, name)
 
 def open_temporary_file(path):
     return TemporaryFileContext(path)
