@@ -1,4 +1,4 @@
-from play32sys import network_helper
+from play32sys import network_helper, app
 from net import microftpd
 import hal_keypad, hal_screen
 from graphic import framebuf_helper
@@ -13,7 +13,7 @@ class ScropedFTPClientInterface(microftpd.DefaultClientInterface):
             return True
         return False
 
-def main(app_name, *args, **kws):
+def main():
     hal_screen.init()
     hal_keypad.init()
     network_helper.deactive_all()
@@ -34,6 +34,7 @@ def main(app_name, *args, **kws):
         hal_screen.get_framebuffer().text("Exiting...", 0, 16, COLOR_WHITE)
         hal_screen.refresh()
         utime.sleep_ms(2000)
+        app.reset_and_run_app("")
         return
     wlan_connected = wlan.isconnected()
     def start():
