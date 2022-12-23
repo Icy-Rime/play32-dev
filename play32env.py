@@ -9,7 +9,6 @@ def setup(app_dir):
     lib_path = os.path.join(sdk_path, "lib")
     data_path = os.path.join(sdk_path, "data")
     tmp_path = os.path.join(sdk_path, "tmp")
-    component_path = os.path.join(sdk_path, "components")
     # app_lib_path = os.path.join(current_app_dir_path, "lib")
     # app_name = os.path.basename(current_app_dir_path)
     # apps_base_dir_path = os.path.abspath(os.path.join(current_app_dir_path, ".."))
@@ -76,7 +75,7 @@ def setup(app_dir):
     sys.modules["uctypes"] = uctypes # no alias
     # setup
     from play32sys import path
-    path._update_base_path(sdk_path, apps_base_dir_path, data_path, tmp_path, component_path)
+    path._update_base_path(sdk_path, apps_base_dir_path, data_path, tmp_path)
     from buildin_resource.font import _update_base
     _update_base(sdk_path)
 

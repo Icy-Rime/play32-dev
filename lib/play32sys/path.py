@@ -9,7 +9,7 @@ __APP_BASE = '/apps'
 __DATA_BASE = '/data'
 __TMP_BASE = '/tmp'
 
-def _update_base_path(root, app, data, tmp, component):
+def _update_base_path(root, app, data, tmp):
     global __ROOT_BASE, __APP_BASE, __DATA_BASE, __TMP_BASE
     __ROOT_BASE = root
     __APP_BASE = app
