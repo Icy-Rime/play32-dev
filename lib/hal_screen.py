@@ -1,28 +1,21 @@
-import framebuf
-from play32hw.ssd1306pygame import SSD1306_Emu
-from play32hw.hw_config import SCREEN_WIDTH, SCREEN_HEIGHT
+from play32hw.hw_config import get_model, MODEL_INITIAL, MODEL_EMULATOR
 
-__screen = None
-__format = -1
+if get_model() == MODEL_INITIAL:
+    from play32hw.pinitial.hal_screen import *
+elif get_model() == MODEL_EMULATOR:
+    from play32hw.pemulator.hal_screen import *
+else:
+    def init():
+        pass
 
-def _get_ssd1306_emu():
-    return __screen
+    def get_size():
+        return 0, 0
 
-def init():
-    global __screen, __format
-    if __screen != None:
-        return
-    __screen = SSD1306_Emu(SCREEN_WIDTH, SCREEN_HEIGHT, ignore_pygame_event=True)
-    __format = framebuf.MONO_VLSB
+    def get_format():
+        return 0
 
-def get_size():
-    return SCREEN_WIDTH, SCREEN_HEIGHT
+    def get_framebuffer():
+        return None
 
-def get_format():
-    return __format
-
-def get_framebuffer() -> framebuf.FrameBuffer:
-    return __screen
-
-def refresh(x=0, y=0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT):
-    __screen.show()
+    def refresh(x=0, y=0, w=0, h=0):
+        pass

@@ -18,8 +18,8 @@ def print_exception(exec, file=sys.stdout):
 # Constants
 argv = []
 byteorder = 'little'
-__Implementation = namedtuple("Implementation", ["name", "version", "mpy"])
-implementation = __Implementation('micropython', (1, 14, 0), 10757)
+__Implementation = namedtuple("Implementation", ["name", "version", "mpy", "machine"])
+implementation = __Implementation('micropython', (1, 19, 1), 10246, "Play32 Emulator with ESP32")
 maxsize = 2147483647
 modules = sys.modules
 path = sys.path
