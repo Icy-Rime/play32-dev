@@ -114,16 +114,20 @@ class ADC():
     WIDTH_10BIT = 1
     WIDTH_11BIT = 2
     WIDTH_12BIT = 3
-    def __init__(self, pin):
+    def __init__(self, pin, *, sample_ns=0, atten=0):
         pass
-    def read(self):
-        return 0
+    def init(*, sample_ns=0, atten=0):
+        pass
+    # def read(self):
+    #     return 0
     def read_u16(self):
         return 0
-    def atten(self, x):
-        pass
-    def width(self, x):
-        pass
+    def read_uv(self):
+        return 0
+    # def atten(self, x):
+    #     pass
+    # def width(self, x):
+    #     pass
 
 class DAC():
     def __init__(self, pin):
