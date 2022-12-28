@@ -13,6 +13,8 @@ SOL_SOCKET = cpy_socket.SOL_SOCKET
 SO_REUSEADDR = cpy_socket.SO_REUSEADDR
 
 def socket(af=AF_INET, type=SOCK_STREAM, proto=IPPROTO_TCP):
+    if type == SOCK_DGRAM and proto == IPPROTO_TCP:
+        proto = IPPROTO_UDP
     sock = cpy_socket.socket(af, type, proto)
     return sock
 def getaddrinfo(host, port, af=0, type=0, proto=0, flags=0):
