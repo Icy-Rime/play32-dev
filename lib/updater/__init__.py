@@ -1,6 +1,6 @@
+import hal_network
 from micropython import const
-from play32sys import path, network_helper
-from net import microftpd
+from play32sys import path
 from graphic import framebuf_console, framebuf_helper, abmfont
 import utime, uos, usys, uhashlib, machine
 # screen console
@@ -24,8 +24,14 @@ TYPE_DIR = const(0X01)
 BUFFER_SIZE = const(4096)
 
 def start_ftp():
-    ap = network_helper.ap("Play32AP", "12345678")
-    utime.sleep(1.0)
+    try:
+        from net import microftpd
+    except:
+        print("Can't start FTP")
+        console.log("Can't start FTP")
+        return
+    ap = hal_network.ap("Play32AP", "12345678")
+    utime.sleep(1)
     ip = ap.ifconfig()[0]
     ftp = microftpd.FTPServer(ip)
     ftp.init()
@@ -41,6 +47,7 @@ def start_ftp():
     console.log("Put framework.pack and sha256 file into /tmp .")
     print("Press A+B to update.")
     console.log("Press A+B to update.")
+    utime.sleep(5)
     is_key_pressed = hal_keypad.is_key_pressed
     KEY_A = hal_keypad.KEY_A
     KEY_B = hal_keypad.KEY_B
