@@ -3,10 +3,9 @@ special sound format for bee
 BeeNoteSoundFrame: Tuple[time, type, padding, data]
 '''
 import ustruct as struct
-from machine import Pin, PWM
 from micropython import const
 from utime import ticks_ms, ticks_diff, ticks_add
-from play32hw.shared_timer import ONE_SHOT, get_shared_timer
+from play32hw.shared_timer import SharedTimer, get_shared_timer
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 from pygame import midi as pyg_midi
@@ -54,6 +53,7 @@ class BuzzNoteSoundFile():
 
 class BuzzPlayer():
     def __init__(self, bee_gpio_num, timer_id_num):
+        from machine import Pin, PWM
         self.__pwm = PWM(Pin(bee_gpio_num), freq=_FREQ_QUITE, duty=_VOLUME_DUTY[0])
         self.__timer = get_shared_timer(timer_id_num)
         self.__timer_id = 0
@@ -127,7 +127,7 @@ class BuzzPlayer():
                 # set timer event as soon as possible
                 self.__target_note_time = ticks_add(self.__target_note_time, time)
                 target_period = ticks_diff(self.__target_note_time, ticks_ms())
-                self.__timer_id = self.__timer.init(mode=ONE_SHOT, period=target_period, callback=self._timer_callback)
+                self.__timer_id = self.__timer.init(mode=SharedTimer.ONE_SHOT, period=target_period, callback=self._timer_callback)
             # deal with frame
             if frame_type == TYPE_SET_TEMPO:
                 self.__tempo = int.from_bytes(frame_data, 'big')
@@ -165,7 +165,7 @@ class BuzzPlayer():
         self.__frame_pointer = 0
         self.__buzz_file.file.seek(10)
         self.__target_note_time = ticks_ms()
-        self.__timer_id = self.__timer.init(mode=ONE_SHOT, period=1, callback=self._timer_callback)
+        self.__timer_id = self.__timer.init(mode=SharedTimer.ONE_SHOT, period=1, callback=self._timer_callback)
 
     def stop(self):
         self.note_off()
