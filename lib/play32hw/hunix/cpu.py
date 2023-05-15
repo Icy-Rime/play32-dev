@@ -1,6 +1,6 @@
-from machine import freq
 from utime import sleep_ms
 from play32hw.hw_config import ResetException
+from play32hw.punix.hal_screen import deinit
 
 VERY_SLOW = 40_000_000
 SLOW = 80_000_000
@@ -9,18 +9,16 @@ FAST = 240_000_000
 
 class CPUContextManager():
     def __init__(self, target_speed):
-        self.__s = target_speed
-        self.__o = freq()
+        pass
     
     def __enter__(self):
-        self.__o = freq()
-        freq(self.__s)
+        pass
     
     def __exit__(self, type, value, trace):
-        freq(self.__o)
+        pass
 
 def set_cpu_speed(speed):
-    freq(speed)
+    pass
 
 def cpu_speed_context(speed):
     return CPUContextManager(speed)
@@ -29,4 +27,6 @@ def sleep(ms):
     sleep_ms(ms)
 
 def reset():
+    deinit()
+    sleep_ms(500)
     raise ResetException()

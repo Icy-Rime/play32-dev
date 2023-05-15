@@ -79,9 +79,26 @@ def setup(app_dir):
 
 def start():
     # start
-    from play32sys import app
-    app._on_boot_()
+    from play32hw.hw_config import ResetException
+    while True:
+        try:
+            from play32sys import app
+            app._on_boot_()
+        except ResetException:
+            continue
+        break
 
 def start_app(app_name=None, *app_args, **app_kws):
-    from play32sys import app
-    app._on_boot_(app_name, *app_args, **app_kws)
+    from play32hw.hw_config import ResetException
+    isFirstTime = True
+    while True:
+        try:
+            from play32sys import app
+            if isFirstTime:
+                isFirstTime = False
+                app._on_boot_(app_name, *app_args, **app_kws)
+            else:
+                app._on_boot_()
+        except ResetException:
+            continue
+        break

@@ -1,9 +1,11 @@
 import uos, usys, ujson
-from play32sys.path import join, get_tmp_path, get_app_path, clear_temporary_dir
+from play32sys.path import join, exist, get_tmp_path, get_app_path, clear_temporary_dir
 from buildin_resource.image import DEFAULT_BOOT_ICON
+from play32hw.cpu import reset as __soft_reset
+
 import gc
 
-VERSION = (1, 16, 0)
+VERSION = (1, 17, 0)
 KEY_BOOT_APP = 'bapp'
 KEY_BOOT_APP_PARAMS = 'bappp'
 KEY_BOOT_APP_KEYWORDS = 'bappk'
@@ -16,7 +18,7 @@ def __init_dict():
     if __boot_dict == None:
         pass
     try:
-        with open(DICT_FILE_PATH, 'r') as f:
+        with open(DICT_FILE_PATH, 'rb') as f:
             __boot_dict = ujson.load(f)
     except:
         __boot_dict = {}
@@ -25,7 +27,7 @@ def __save_dict():
     if __boot_dict == None:
         return
     try:
-        with open(DICT_FILE_PATH, 'w') as f:
+        with open(DICT_FILE_PATH, 'wt') as f:
             ujson.dump(__boot_dict, f)
     except Exception as e:
         usys.print_exception(e)
@@ -36,16 +38,15 @@ def _on_boot_(app_name=None, *app_args, **app_kws):
     # >>>> init screen <<<<
     import hal_screen
     hal_screen.init()
-    hal_screen.get_framebuffer().fill(0)
     render_boot_image()
     # >>>> init <<<<
-    # init your need.
-    # import hal_keypad, hal_buzz, hal_led, hal_battery
-    # hal_keypad.init()
-    # hal_buzz.init()
-    # hal_led.init()
-    # hal_battery.init()
-    # >>>> start <<<<
+    # init what you need.
+    
+    argv = usys.argv # type: list[str]
+    for opt in argv:
+        if opt.startswith('-Oapp='):
+            app_name = opt[len('-Oapp='):]
+    
     if app_name != None:
         boot_app, args, kws = app_name, app_args, app_kws
     else:
@@ -60,8 +61,6 @@ def _on_boot_(app_name=None, *app_args, **app_kws):
     else:
         from components.app_selector import appmain as app_selector
         app_selector.main()
-    print("Program ended, entering REPL mode when running on Play32.")
-    usys.exit(0)
 
 # app function
 def get_boot_app():
@@ -93,13 +92,13 @@ def render_boot_image():
     if boot_image_path != "":
         from graphic import framebuf_helper
         import framebuf, hal_screen
-        if boot_image_path == DEFAULT_BOOT_ICON:
-            from buildin_resource.image.play32_icon import PLAY32_ICON_DATA
-            iw, ih, idata = PLAY32_ICON_DATA
-        else:
+        if exist(boot_image_path):
             from graphic import pbm
             with open(boot_image_path, 'rb') as ifile:
                 iw, ih, _, idata = pbm.read_image(ifile)[:4]
+        else:
+            from buildin_resource.image.play32_icon import PLAY32_ICON_DATA
+            iw, ih, idata = PLAY32_ICON_DATA
         image = framebuf.FrameBuffer(idata, iw, ih, framebuf.MONO_HLSB)
         image = framebuf_helper.ensure_same_format(
             image, 
@@ -140,8 +139,7 @@ def reset_and_run_app(app_name, *args, **kws):
         set_boot_image(DEFAULT_BOOT_ICON)
     if render_boot_image():
         disable_boot_image()
-    # __soft_reset()
-    _on_boot_(app_name, True)
+    __soft_reset()
 
 def run_app(app_name, *args, **kws):
     curr = uos.getcwd()
@@ -156,8 +154,11 @@ def run_app(app_name, *args, **kws):
         del module
         return res
     finally:
-        uos.chdir(curr)
+        if "appmain" in usys.modules:
+            del usys.modules["appmain"]
         usys.path.remove(get_app_path(app_name))
+        usys.path.remove(join(get_app_path(app_name), "lib"))
+        uos.chdir(curr)
         gc.collect()
 
 # debug function
@@ -198,3 +199,16 @@ def timed_function_async(f, *args, **kwargs):
         print('Function [{}] Time = {:6.3f}ms'.format(myname, delta/1000))
         return result
     return new_func
+
+def print_exception(e):
+    import hal_screen, uio, usys
+    from graphic import abmfont, framebuf_console, framebuf_helper
+    WHITE = framebuf_helper.get_white_color(hal_screen.get_format())
+    hal_screen.init()
+    frame = hal_screen.get_framebuffer()
+    w, h = hal_screen.get_size()
+    console = framebuf_console.Console(frame, w, h, abmfont.FontDrawSmallAscii(), WHITE, hal_screen.refresh)
+    err = uio.BytesIO()
+    usys.print_exception(e, err)
+    err.seek(0)
+    console.log(err.read().decode("utf8"))
