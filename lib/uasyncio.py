@@ -24,6 +24,8 @@ Event = asyncio.Event
 class ThreadSafeFlag():
     def __init__(self):
         self.__flag = False
+    def clear(self):
+        self.__flag = False
     def set(self):
         self.__flag = True
     async def wait(self):
