@@ -6,11 +6,6 @@ import ustruct as struct
 from micropython import const
 from utime import ticks_ms, ticks_diff, ticks_add
 from play32hw.shared_timer import SharedTimer, get_shared_timer
-from os import environ
-environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
-from pygame import midi as pyg_midi
-pyg_midi.init()
-_pyg_output = pyg_midi.Output(0)
 
 TYPE_EMIT_EVENT = const(0X00)
 TYPE_SET_TEMPO = const(0X01)
@@ -69,12 +64,6 @@ class BuzzPlayer():
         self.__loop = False
         # status
         self.__is_playing = False
-        # CPython
-        self.__output = _pyg_output
-        self.__output.set_instrument(26)
-        # self.__output = mido.open_output()
-        # self.__output.send(mido.Message('program_change', program=2))
-        self.__playing = None
     
     @property
     def is_playing(self):
@@ -93,33 +82,18 @@ class BuzzPlayer():
         self.play_next_note(True)
 
     def note_on(self, note, volume):
-        if self.__playing:
-            self.__output.note_off(self.__playing, 0)
-        note = note + self.__note_shift + 7
+        note = note + self.__note_shift
         note = 0 if note < 0 else note
-        note = 128 - 1 if note >= 128 else note
-        self.__output.note_on(note, volume*127//9)
-        self.__playing = note
-        # if self.__playing:
-        #     last = self.__playing
-        #     msg = mido.Message('note_off', channel=0, note=last.note, velocity=0)
-        #     self.__playing = None
-        #     self.__output.send(msg)
-        # msg = mido.Message('note_on', channel=0, note=note, velocity=volume*128//10)
-        # self.__playing = msg
-        # self.__output.send(msg)
+        note = len(_NOTE_FREQ) - 1 if note >= len(_NOTE_FREQ) else note
+        self.__pwm.freq(_NOTE_FREQ[note])
+        self.__pwm.duty(_VOLUME_DUTY[volume])
 
     def note_off(self):
-        if self.__playing:
-            self.__output.note_off(self.__playing, 0)
-            self.__playing = None
+        self.__pwm.duty(_VOLUME_DUTY[0])
 
     def play_next_note(self, play_next_note=False):
         try:
-            try:
-                time, frame_type, padding, frame_data = parse_bee_frame(self.__buzz_file.file.read(8))
-            except:
-                return
+            time, frame_type, padding, frame_data = parse_bee_frame(self.__buzz_file.file.read(8))
             time = time * self.__tempo // self.__buzz_file.ticks_per_beat // 1000 # us -> ms
             # play next note
             self.__frame_pointer += 1
@@ -168,7 +142,6 @@ class BuzzPlayer():
         self.__timer_id = self.__timer.init(mode=SharedTimer.ONE_SHOT, period=1, callback=self._timer_callback)
 
     def stop(self):
-        self.note_off()
         self.__timer.deinit(self.__timer_id)
         self.__pwm.freq(_FREQ_QUITE)
         self.__pwm.duty(_VOLUME_DUTY[0])
@@ -178,7 +151,6 @@ class BuzzPlayer():
         self.__buzz_file = buzz_sound_file
 
     def unload(self):
-        self.stop()
         self.__tempo = _DEFAULT_TEMPO
         self.__buzz_file = None
 

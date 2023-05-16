@@ -26,6 +26,8 @@ def set_sys_config(key, value):
     __json[key] = value
 
 def save_sys_config():
+    if __json == None:
+        init()
     __p = path.join(path.get_data_path(), "sys_config.json")
     try:
         with open(__p, "wb") as f:
